@@ -1,0 +1,1 @@
+sw-precache --static-file-globs='./**/*.{js,html,css,png,jpg,gif,svg,eot,ttf,woff}' 

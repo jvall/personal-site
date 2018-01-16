@@ -176,6 +176,15 @@
   <script src="assets/js/util.js"></script>
   <!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
   <script src="assets/js/main.js"></script>
+  <script type="text/javascript">
+    if (navigator.serviceWorker) {
+      navigator.serviceWorker.register('./service-worker.js').then(function (registration) {
+        console.log('ServiceWorker registration successful with scope:', registration.scope);
+      }).catch(function (error) {
+        console.log('ServiceWorker registration failed:', error);
+      });
+    }
+  </script>
 
 </body>
 
