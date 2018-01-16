@@ -1,201 +1,246 @@
-/*
-	Indivisible by Pixelarity
-	pixelarity.com | hello@pixelarity.com
-	License: pixelarity.com/license
-*/
+(function ($) {
 
-(function($) {
+  $('#contact-form').submit(function (event) {
+    event.preventDefault();
+    $('#form-actions').attr('disabled', 'disabled');
+    $('#form-actions').prop('value', 'Processing...');
+    $('#validation-message').addClass('hide-form-messages');
+    $('#email-validation-message').addClass('hide-form-messages');
 
-	skel.breakpoints({
-		xlarge:	'(max-width: 1680px)',
-		large:	'(max-width: 1280px)',
-		medium:	'(max-width: 980px)',
-		small:	'(max-width: 736px)',
-		xsmall:	'(max-width: 480px)',
-		xxsmall: '(max-width: 360px)'
-	});
+    const data = {
+      name: $('#name').val(),
+      email: $('#email').val(),
+      description: $('#message').val()
+    };
 
-	$(function() {
+    if (data.name === '' || data.email === '' || data.description === '') {
+      $('#form-actions').removeAttr('disabled');
+      $('#form-actions').prop('value', 'Send Message');
+      $('#validation-message').removeClass('hide-form-messages');
+      $('#form-actions').removeClass('hide-form-messages');
+      return;
+    }
 
-		var	$window = $(window),
-			$document = $(document),
-			$body = $('body'),
-			$wrapper = $('#wrapper'),
-			$footer = $('#footer');
+    var emailRegex = RegExp(/(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/, 'g');
+    if (!emailRegex.test(data.email)) {
+      $('#form-actions').removeAttr('disabled');
+      $('#form-actions').prop('value', 'Send Message');
+      $('#email-validation-message').removeClass('hide-form-messages');
+      $('#form-actions').removeClass('hide-form-messages');
+      return;
+    }
 
-		// Disable animations/transitions until the page has loaded.
-			$window.on('load', function() {
-				window.setTimeout(function() {
-					$body.removeClass('is-loading-0');
+    $.ajax({
+      "async": true,
+      "crossDomain": true,
+      type: 'POST',
+      url: 'https://y46nsi0vaj.execute-api.us-east-1.amazonaws.com/jvalldeploystage0/contact',
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      success: function () {
+        $('#success-message').removeClass('hide-form-messages');
+        $('#contact-form').addClass('hide-form-messages-preserve-space');
+        $('#processing-message').addClass('hide-form-messages');
+      },
+      error: function () {
+        $('#error-message').removeClass('hide-form-messages');
+        $('#contact-form').addClass('hide-form-messages');
+        $('#processing-message').addClass('hide-form-messages');
+      }
+    })
+  })
 
-					window.setTimeout(function() {
-						$body.removeClass('is-loading-1');
-					}, 1500);
-				}, 100);
-			});
+  skel.breakpoints({
+    xlarge: '(max-width: 1680px)',
+    large: '(max-width: 1280px)',
+    medium: '(max-width: 980px)',
+    small: '(max-width: 736px)',
+    xsmall: '(max-width: 480px)',
+    xxsmall: '(max-width: 360px)'
+  });
 
-		// Fix: Placeholder polyfill.
-			$('form').placeholder();
+  $(function () {
 
-		// Panels.
-			var $wrapper = $('#wrapper'),
-				$panels = $wrapper.children('.panel'),
-				locked = true;
+    var $window = $(window),
+      $document = $(document),
+      $body = $('body'),
+      $wrapper = $('#wrapper'),
+      $footer = $('#footer');
 
-			// Deactivate + hide all but the first panel.
-				$panels.not($panels.first())
-					.addClass('inactive')
-					.hide();
+    // Disable animations/transitions until the page has loaded.
+    $window.on('load', function () {
+      window.setTimeout(function () {
+        $body.removeClass('is-loading-0');
 
-			// Fix images.
-				$panels.each(function() {
+        window.setTimeout(function () {
+          $body.removeClass('is-loading-1');
+        }, 1500);
+      }, 100);
+    });
 
-					var	$this = $(this),
-						$image = $this.children('.image'),
-						$img = $image.find('img'),
-						position = $img.data('position');
+    // Fix: Placeholder polyfill.
+    $('form').placeholder();
 
-					// Set background.
-						$image.css('background-image', 'url(' + $img.attr('src') + ')');
+    // Panels.
+    var $wrapper = $('#wrapper'),
+      $panels = $wrapper.children('.panel'),
+      locked = true;
 
-					// Set position (if set).
-						if (position)
-							$image.css('background-position', position);
+    // Deactivate + hide all but the first panel.
+    $panels.not($panels.first())
+      .addClass('inactive')
+      .hide();
 
-					// Hide original.
-						$img.hide();
+    // Fix images.
+    $panels.each(function () {
 
-				});
+      var $this = $(this),
+        $image = $this.children('.image'),
+        $img = $image.find('img'),
+        position = $img.data('position');
 
-			// Unlock after a delay.
-				window.setTimeout(function() {
-					locked = false;
-				}, 1250);
+      // Set background.
+      $image.css('background-image', 'url(' + $img.attr('src') + ')');
 
-			// Click event.
-				$('a[href^="#"]').on('click', function(event) {
+      // Set position (if set).
+      if (position)
+        $image.css('background-position', position);
 
-					var $this = $(this),
-						id = $this.attr('href'),
-						$panel = $(id),
-						$ul = $this.parents('ul'),
-						delay = 0;
+      // Hide original.
+      $img.hide();
 
-					// Prevent default.
-						event.preventDefault();
-						event.stopPropagation();
+    });
 
-					// Locked? Bail.
-						if (locked)
-							return;
+    // Unlock after a delay.
+    window.setTimeout(function () {
+      locked = false;
+    }, 1250);
 
-					// Lock.
-						locked = true;
+    // Click event.
+    $('a[href^="#"]').on('click', function (event) {
 
-					// Activate link.
-						$this.addClass('active');
+      var $this = $(this),
+        id = $this.attr('href'),
+        $panel = $(id),
+        $ul = $this.parents('ul'),
+        delay = 0;
 
-						if ($ul.hasClass('spinX')
-						||	$ul.hasClass('spinY'))
-							delay = 250;
+      // Prevent default.
+      event.preventDefault();
+      event.stopPropagation();
 
-					// Delay.
-						window.setTimeout(function() {
+      // Locked? Bail.
+      if (locked)
+        return;
 
-							// Deactivate all panels.
-								$panels.addClass('inactive');
+      // Lock.
+      locked = true;
 
-							// Deactivate footer.
-								$footer.addClass('inactive');
+      // Activate link.
+      $this.addClass('active');
 
-							// Delay.
-								window.setTimeout(function() {
+      if ($ul.hasClass('spinX')
+        || $ul.hasClass('spinY'))
+        delay = 250;
 
-									// Hide all panels.
-										$panels.hide();
+      // Delay.
+      window.setTimeout(function () {
 
-									// Show target panel.
-										$panel.show();
+        // Deactivate all panels.
+        $panels.addClass('inactive');
 
-									// Reset scroll.
-										$document.scrollTop(0);
+        // Deactivate footer.
+        $footer.addClass('inactive');
 
-									// Delay.
-										window.setTimeout(function() {
+        // Delay.
+        window.setTimeout(function () {
 
-											// Activate target panel.
-												$panel.removeClass('inactive');
+          // Hide all panels.
+          $panels.hide();
 
-											// Deactivate link.
-												$this.removeClass('active');
+          // Show target panel.
+          $panel.show();
 
-											// Unlock.
-												locked = false;
+          // Reset scroll.
+          $document.scrollTop(0);
 
-											// IE: Refresh.
-												$window.triggerHandler('--refresh');
+          // Delay.
+          window.setTimeout(function () {
 
-											window.setTimeout(function() {
+            // Activate target panel.
+            $panel.removeClass('inactive');
 
-												// Activate footer.
-													$footer.removeClass('inactive');
+            // Deactivate link.
+            $this.removeClass('active');
 
-											}, 250);
+            // Unlock.
+            locked = false;
 
-										}, 100);
+            // IE: Refresh.
+            $window.triggerHandler('--refresh');
 
-								}, 350);
+            window.setTimeout(function () {
 
-						}, delay);
+              // Activate footer.
+              $footer.removeClass('inactive');
 
-				});
+            }, 250);
 
-		// IE: Fixes.
-			if (skel.vars.IEVersion < 12) {
+          }, 100);
 
-				// Layout fixes.
-					$window.on('--refresh', function() {
+        }, 350);
 
-						// Fix min-height/flexbox.
-							$wrapper.css('height', 'auto');
+      }, delay);
 
-							window.setTimeout(function() {
+    });
 
-								var h = $wrapper.height(),
-									wh = $window.height();
+    // IE: Fixes.
+    if (skel.vars.IEVersion < 12) {
 
-								if (h < wh)
-									$wrapper.css('height', '100vh');
+      // Layout fixes.
+      $window.on('--refresh', function () {
 
-							}, 0);
+        // Fix min-height/flexbox.
+        $wrapper.css('height', 'auto');
 
-						// Fix panel image/content heights (IE<10 only).
-							if (skel.vars.IEVersion < 10) {
+        window.setTimeout(function () {
 
-								var $panel = $('.panel').not('.inactive'),
-									$image = $panel.find('.image'),
-									$content = $panel.find('.content'),
-									ih = $image.height(),
-									ch = $content.height(),
-									x = Math.max(ih, ch);
+          var h = $wrapper.height(),
+            wh = $window.height();
 
-								$image.css('min-height', x + 'px');
-								$content.css('min-height', x + 'px');
+          if (h < wh)
+            $wrapper.css('height', '100vh');
 
-							}
+        }, 0);
 
-					});
+        // Fix panel image/content heights (IE<10 only).
+        if (skel.vars.IEVersion < 10) {
 
-					$window.on('load', function() {
-						$window.triggerHandler('--refresh');
-					});
+          var $panel = $('.panel').not('.inactive'),
+            $image = $panel.find('.image'),
+            $content = $panel.find('.content'),
+            ih = $image.height(),
+            ch = $content.height(),
+            x = Math.max(ih, ch);
 
-				// Remove spinX/spinY.
-					$('.spinX').removeClass('spinX');
-					$('.spinY').removeClass('spinY');
+          $image.css('min-height', x + 'px');
+          $content.css('min-height', x + 'px');
 
-			}
+        }
 
-	});
+      });
+
+      $window.on('load', function () {
+        $window.triggerHandler('--refresh');
+      });
+
+      // Remove spinX/spinY.
+      $('.spinX').removeClass('spinX');
+      $('.spinY').removeClass('spinY');
+
+    }
+
+  });
 
 })(jQuery);
